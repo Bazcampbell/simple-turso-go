@@ -7,12 +7,11 @@ import (
 	"os"
 	"testing"
 
-	simpleturso "github.com/Bazcampbell/simple-turso-go/pkg"
 	"github.com/joho/godotenv"
 )
 
 func TestFullIntegration(t *testing.T) {
-	godotenv.Load("../.env")
+	godotenv.Load(".env")
 
 	dbUrl := os.Getenv("TURSO_URL")
 	dbKey := os.Getenv("TURSO_KEY")
@@ -24,11 +23,11 @@ func TestFullIntegration(t *testing.T) {
 	// 2. Test Initialization
 	// This will internally run 'SELECT 1' to verify the connection
 	t.Run("Initialize Package", func(t *testing.T) {
-		conf := &simpleturso.Config{
+		conf := &Config{
 			DbUrl: dbUrl,
 			DbKey: dbKey,
 		}
-		err := simpleturso.Init(conf)
+		err := Init(conf)
 		if err != nil {
 			t.Fatalf("Init failed: %v. Check if your URL starts with libsql:// or https://", err)
 		}
@@ -43,12 +42,12 @@ func TestFullIntegration(t *testing.T) {
 			level TEXT, 
 			message TEXT
 		)`
-		err := simpleturso.Execute(setupQuery, nil)
+		err := Execute(setupQuery, nil)
 		if err != nil {
 			t.Fatalf("Failed to ensure logs table: %v", err)
 		}
 
-		err = simpleturso.LogToTurso("INFO", "Integration test log", "simple_turso_sdk", "UTC")
+		err = LogToTurso("INFO", "Integration test log", "simple_turso_sdk", "UTC")
 		if err != nil {
 			t.Errorf("LogToTurso failed: %v", err)
 		}
@@ -61,7 +60,7 @@ func TestFullIntegration(t *testing.T) {
 		}
 
 		query := "SELECT 100 as val"
-		res, err := simpleturso.Select(query, nil, func(row map[string]interface{}) (Result, error) {
+		res, err := Select(query, nil, func(row map[string]interface{}) (Result, error) {
 			return Result{Val: row["val"].(float64)}, nil
 		})
 
@@ -77,23 +76,23 @@ func TestFullIntegration(t *testing.T) {
 
 func TestInitValidationErrors(t *testing.T) {
 	// Test Invalid Key
-	confBadKey := &simpleturso.Config{
+	confBadKey := &Config{
 		DbUrl: "https://valid.turso.io",
 		DbKey: "not-a-jwt",
 	}
-	if err := simpleturso.Init(confBadKey); err == nil || err.Error() != "invalid db key" {
+	if err := Init(confBadKey); err == nil || err.Error() != "invalid db key" {
 		t.Errorf("Expected 'invalid db key' error, got: %v", err)
 	}
 
 	// Test Invalid URL
-	confBadUrl := &simpleturso.Config{
+	confBadUrl := &Config{
 		DbUrl: "https://wrong-domain.com",
 		DbKey: "hdr.pay.sig",
 	}
 	// Note: If Init was already called successfully in another test,
 	// sync.Once might skip the config assignment, but the validation
 	// check at the top of Init happens EVERY time.
-	if err := simpleturso.Init(confBadUrl); err == nil || err.Error() != "invalid db url" {
+	if err := Init(confBadUrl); err == nil || err.Error() != "invalid db url" {
 		t.Errorf("Expected 'invalid db url' error, got: %v", err)
 	}
 }
