@@ -7,23 +7,25 @@ import (
 	"time"
 )
 
-func LogToTurso(level LogLevel, message, application, timezone string) error {
+func LogToTurso(level LogLevel, err error, message, application, timezone string) error {
 	cfg, err := getConfig()
 	if err != nil {
 		return err
 	}
-	
+
 	location, err := time.LoadLocation(timezone)
 	if err != nil {
 		return err
 	}
 	timestamp := time.Now().In(location).Format("02/01/2006 15:04:05")
 
+	errMessage := fmt.Sprintf("%s: %d", message, err)
+
 	req := TursoRequest{
 		Statements: []Statement{
 			{
 				Q:      "INSERT INTO logs (timestamp, application, level, message) VALUES (?, ?, ?, ?)",
-				Params: []interface{}{timestamp, application, level, message},
+				Params: []interface{}{timestamp, application, level, errMessage},
 			},
 		},
 	}
@@ -38,7 +40,7 @@ func Select[T any](query string, params []interface{}, scan func(map[string]inte
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if params == nil {
 		params = []interface{}{}
 	}
@@ -90,7 +92,7 @@ func Execute(query string, params []interface{}) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if params == nil {
 		params = []interface{}{}
 	}
