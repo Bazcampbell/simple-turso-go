@@ -4,10 +4,11 @@ package simpleturso
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
-func LogToTurso(level LogLevel, err error, message, application, timezone string) error {
+func LogToTurso(level LogLevel, message, application, timezone string, keysAndValues ...interface{}) error {
 	cfg, err := getConfig()
 	if err != nil {
 		return err
@@ -19,13 +20,27 @@ func LogToTurso(level LogLevel, err error, message, application, timezone string
 	}
 	timestamp := time.Now().In(location).Format("02/01/2006 15:04:05")
 
-	errMessage := fmt.Sprintf("%s: %d", message, err)
+	var messageParts []string
+	messageParts = append(messageParts, message)
+
+	for i := 0; i < len(keysAndValues); i += 2 {
+		if i+1 >= len(keysAndValues) {
+			// Odd number of arguments, skip the last one
+			break
+		}
+
+		key := fmt.Sprintf("%v", keysAndValues[i])
+		value := keysAndValues[i+1]
+
+		messageParts = append(messageParts, fmt.Sprintf("%s=%v", key, value))
+	}
+	fullMessage := strings.Join(messageParts, ", ")
 
 	req := TursoRequest{
 		Statements: []Statement{
 			{
 				Q:      "INSERT INTO logs (timestamp, application, level, message) VALUES (?, ?, ?, ?)",
-				Params: []interface{}{timestamp, application, level, errMessage},
+				Params: []interface{}{timestamp, application, level, fullMessage},
 			},
 		},
 	}

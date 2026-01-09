@@ -4,7 +4,6 @@
 package simpleturso
 
 import (
-	"fmt"
 	"os"
 	"testing"
 
@@ -48,9 +47,7 @@ func TestFullIntegration(t *testing.T) {
 			t.Fatalf("Failed to ensure logs table: %v", err)
 		}
 
-		mockErr := fmt.Errorf("test error")
-
-		err = LogToTurso("INFO", mockErr, "Integration test log", "simple_turso_sdk", "UTC")
+		err = LogToTurso(LogLevelError, "integration test log", "integration_test_log", "Australia/Sydney", "function", "t.Run", "weather", "nice and sunny")
 		if err != nil {
 			t.Errorf("LogToTurso failed: %v", err)
 		}
