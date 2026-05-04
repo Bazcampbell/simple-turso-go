@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func LogToTurso(level LogLevel, message, application, timezone string, keysAndValues ...interface{}) error {
+func LogToTurso(level LogLevel, message, application, timezone string, user_id int, keysAndValues ...interface{}) error {
 	cfg, err := getConfig()
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func LogToTurso(level LogLevel, message, application, timezone string, keysAndVa
 	req := TursoRequest{
 		Statements: []Statement{
 			{
-				Q:      "INSERT INTO logs (timestamp, application, level, message) VALUES (?, ?, ?, ?)",
+				Q:      "INSERT INTO logs (timestamp, application, level, user_id, message) VALUES (?, ?, ?, ?, ?)",
 				Params: []interface{}{timestamp, application, level, fullMessage},
 			},
 		},

@@ -47,7 +47,7 @@ func TestFullIntegration(t *testing.T) {
 			t.Fatalf("Failed to ensure logs table: %v", err)
 		}
 
-		err = LogToTurso(LogLevelError, "integration test log", "integration_test_log", "Australia/Sydney", "function", "t.Run", "weather", "nice and sunny")
+		err = LogToTurso(LogLevelError, "integration test log", "integration_test_log", "Australia/Sydney", 0, "function", "t.Run", "weather", "nice and sunny")
 		if err != nil {
 			t.Errorf("LogToTurso failed: %v", err)
 		}
