@@ -40,7 +40,7 @@ func LogToTurso(level LogLevel, message, application, timezone string, user_id i
 		Statements: []Statement{
 			{
 				Q:      "INSERT INTO logs (timestamp, application, level, user_id, message) VALUES (?, ?, ?, ?, ?)",
-				Params: []interface{}{timestamp, application, level, fullMessage},
+				Params: []interface{}{timestamp, application, level, user_id, fullMessage},
 			},
 		},
 	}
